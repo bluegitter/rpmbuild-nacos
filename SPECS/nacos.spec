@@ -1,3 +1,4 @@
+%global _topdir		%(echo $HOME)/rpmbuild-%{name}
 Name: nacos
 Version: 2.2.0
 Release: 1
@@ -6,7 +7,8 @@ Summary: Nacos Server
 Group: Applications/Internet
 License: Apache License 2.0
 URL: https://nacos.io
-Source0: nacos-server-2.2.0.tar.gz 
+Source0: nacos-server-%{version}.tar.gz 
+Source1: nacos.service
 
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -23,32 +25,43 @@ Nacos Server is a distributed configuration service, service discovery, and serv
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/opt/nacos-2.2.0
-cp -r * $RPM_BUILD_ROOT/opt/nacos-2.2.0/
+mkdir -p $RPM_BUILD_ROOT/opt/nacos-%{version}
+cp -r * $RPM_BUILD_ROOT/opt/nacos-%{version}/
+install -Dpm0640 %{SOURCE1} 		%{buildroot}%{_unitdir}/%{name}.service
 
 %files
-/opt/nacos-2.2.0/target/nacos-server.jar
-/opt/nacos-2.2.0/LICENSE
-/opt/nacos-2.2.0/NOTICE
-/opt/nacos-2.2.0/bin/shutdown.cmd
-/opt/nacos-2.2.0/bin/shutdown.sh
-/opt/nacos-2.2.0/bin/startup.cmd
-/opt/nacos-2.2.0/bin/startup.sh
-/opt/nacos-2.2.0/conf/1.4.0-ipv6_support-update.sql
-/opt/nacos-2.2.0/conf/application.properties
-/opt/nacos-2.2.0/conf/application.properties.example
-/opt/nacos-2.2.0/conf/cluster.conf.example
-/opt/nacos-2.2.0/conf/derby-schema.sql
-/opt/nacos-2.2.0/conf/mysql-schema.sql
-/opt/nacos-2.2.0/conf/nacos-logback.xml
+/opt/nacos-%{version}/target/nacos-server.jar
+/opt/nacos-%{version}/LICENSE
+/opt/nacos-%{version}/NOTICE
+/opt/nacos-%{version}/bin/shutdown.cmd
+/opt/nacos-%{version}/bin/shutdown.sh
+/opt/nacos-%{version}/bin/startup.cmd
+/opt/nacos-%{version}/bin/startup.sh
+/opt/nacos-%{version}/conf/1.4.0-ipv6_support-update.sql
+/opt/nacos-%{version}/conf/application.properties
+/opt/nacos-%{version}/conf/application.properties.example
+/opt/nacos-%{version}/conf/cluster.conf.example
+/opt/nacos-%{version}/conf/derby-schema.sql
+/opt/nacos-%{version}/conf/mysql-schema.sql
+/opt/nacos-%{version}/conf/nacos-logback.xml
+%{_unitdir}/%{name}.service
 
 %post
+# Manage systemd service
+%systemd_post %{name}.service
+
 echo "Nacos Server is installed."
 
 %preun
+# Manage systemd service
+%systemd_preun %{name}.service
+
 echo "Uninstalling Nacos Server."
 
 %postun
+# Manage systemd service
+%systemd_postun_with_restart %{name}.service
+
 echo "Nacos Server is uninstalled."
 
 %clean
