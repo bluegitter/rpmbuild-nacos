@@ -1,0 +1,11 @@
+[Unit]
+Description=A Spring Boot application
+After=syslog.target
+ 
+[Service]
+User=root
+ExecStart=/opt/jdk1.8.0_301/bin/java -jar /opt/nacos-2.2.0/target/nacos-server.jar 
+SuccessExitStatus=100 
+ 
+[Install] 
+WantedBy=multi-user.target
